@@ -1,5 +1,12 @@
 let currentAnnotations = [];
 
+const HIGHLIGHT_COLORS = {
+  yellow: '#f5e08a',
+  green: '#b7e0b0',
+  pink: '#f3b8c4',
+  blue: '#a9d1ea'
+};
+
 async function fetchAnnotations() {
   const res = await fetch(`/api/annotations/${window.readerBookId}`);
   currentAnnotations = await res.json();
@@ -54,14 +61,40 @@ document.getElementById('highlightBtn').addEventListener('click', async () => {
   popup.hidden = true;
   window.getSelection().removeAllRanges();
   await applyAnnotationsToChapter(window.readerState.chapterIdx);
+  renderNotesList();
 });
 
 document.addEventListener('mousedown', (e) => {
   if (!popup.contains(e.target)) popup.hidden = true;
 });
 
+async function deleteAnnotation(id) {
+  if (!confirm('删除这条批注？')) return;
+  await fetch(`/api/annotations/${window.readerBookId}/${id}`, { method: 'DELETE' });
+  await applyAnnotationsToChapter(window.readerState.chapterIdx);
+  renderNotesList();
+}
+
+pageContainerEl.addEventListener('click', (e) => {
+  const mark = e.target.closest('mark.annotated');
+  if (!mark) return;
+  deleteAnnotation(mark.dataset.annotationId);
+});
+
+function clearAnnotationMarks() {
+  // 每次重新应用批注前先把旧的 <mark> 拆掉，否则重复调用会把同一段文字
+  // 嵌套包裹多层 <mark>，半透明背景层层叠加导致颜色越叠越深。
+  pageContainerEl.querySelectorAll('mark.annotated').forEach((m) => {
+    const parent = m.parentNode;
+    while (m.firstChild) parent.insertBefore(m.firstChild, m);
+    parent.removeChild(m);
+    parent.normalize();
+  });
+}
+
 async function applyAnnotationsToChapter(chapterIdx) {
   await fetchAnnotations();
+  clearAnnotationMarks();
   const marks = currentAnnotations.filter((a) => a.chapter_idx === chapterIdx);
   if (!marks.length) return;
 
@@ -70,7 +103,6 @@ async function applyAnnotationsToChapter(chapterIdx) {
   const textNodes = [];
   let node;
   while ((node = walker.nextNode())) textNodes.push(node);
-  const fullText = textNodes.map((n) => n.textContent).join('');
 
   marks
     .sort((a, b) => b.anchor_start - a.anchor_start)
@@ -94,6 +126,7 @@ function wrapRange(textNodes, start, end, mark) {
       markEl.className = 'annotated';
       markEl.title = mark.note || '';
       markEl.dataset.annotationId = mark.id;
+      markEl.style.backgroundColor = HIGHLIGHT_COLORS[mark.color] || HIGHLIGHT_COLORS.yellow;
       try { range.surroundContents(markEl); } catch (e) { /* 跨节点选区跳过，骨架阶段可接受 */ }
     }
     if (offset + nodeLen >= end) break;
@@ -106,8 +139,24 @@ function renderNotesList() {
   list.innerHTML = '';
   currentAnnotations.forEach((a) => {
     const li = document.createElement('li');
-    li.textContent = `[第${a.chapter_idx + 1}章] ${a.quote_text.slice(0, 20)}${a.note ? ' — ' + a.note : ''}`;
-    li.addEventListener('click', () => window.loadChapter(a.chapter_idx, 0));
+    li.className = 'note-item';
+
+    const span = document.createElement('span');
+    span.className = 'note-text';
+    span.textContent = `[第${a.chapter_idx + 1}章] ${a.quote_text.slice(0, 20)}${a.note ? ' — ' + a.note : ''}`;
+    span.addEventListener('click', () => window.loadChapter(a.chapter_idx, 0));
+
+    const delBtn = document.createElement('button');
+    delBtn.className = 'note-delete';
+    delBtn.textContent = '×';
+    delBtn.title = '删除';
+    delBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      deleteAnnotation(a.id);
+    });
+
+    li.appendChild(span);
+    li.appendChild(delBtn);
     list.appendChild(li);
   });
 }

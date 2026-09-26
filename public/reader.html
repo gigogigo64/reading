@@ -23,6 +23,49 @@
       <ul id="searchResults"></ul>
     </aside>
 
+    <aside id="settingsPanel" class="side-panel" hidden>
+      <h3>设置</h3>
+      <div class="settings-row">
+        <span class="settings-label">字号</span>
+        <div class="settings-control">
+          <button id="fontSizeDown" class="mini-btn">A−</button>
+          <span id="fontSizeValue" class="settings-value">18</span>
+          <button id="fontSizeUp" class="mini-btn">A+</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">字体</span>
+        <div class="settings-control">
+          <button id="fontSong" class="mini-btn toggle-btn">宋体</button>
+          <button id="fontKai" class="mini-btn toggle-btn">楷体</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">行距</span>
+        <div class="settings-control">
+          <button id="lineHeightDown" class="mini-btn">−</button>
+          <span id="lineHeightValue" class="settings-value">2.0</span>
+          <button id="lineHeightUp" class="mini-btn">+</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">栏数</span>
+        <div class="settings-control">
+          <button id="columns1" class="mini-btn toggle-btn">单栏</button>
+          <button id="columns2" class="mini-btn toggle-btn">双栏</button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">页边距</span>
+        <div class="settings-control">
+          <button id="marginDown" class="mini-btn">−</button>
+          <span id="marginValue" class="settings-value">72</span>
+          <button id="marginUp" class="mini-btn">+</button>
+        </div>
+      </div>
+      <button id="settingsReset" class="btn settings-reset">恢复默认</button>
+    </aside>
+
     <div class="reading-area">
       <div class="page-viewport">
         <h2 id="chapterTitle"></h2>
@@ -37,7 +80,10 @@
       <footer class="toolbar">
         <a href="index.html" class="btn">← 书架</a>
         <button id="prevPage" class="btn">上一页</button>
-        <span id="pageIndicator" class="page-indicator"></span>
+        <span class="page-indicator">
+          <span id="chapterUnitWrap">第 <input id="chapterInput" type="number" min="1" class="jump-input" /> 章 · </span>
+          <input id="pageInput" type="number" min="1" class="jump-input" />/<span id="pageTotalLabel">1</span> 页
+        </span>
         <button id="nextPage" class="btn">下一页</button>
       </footer>
     </div>
@@ -50,6 +96,7 @@
       <button id="toggleToc" class="tab-btn">目录</button>
       <button id="toggleNotes" class="tab-btn">批注</button>
       <button id="toggleSearch" class="tab-btn">检索</button>
+      <button id="toggleSettings" class="tab-btn">设置</button>
       <button id="toggleTheme" class="tab-btn">日夜</button>
     </nav>
   </div>

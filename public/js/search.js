@@ -18,7 +18,7 @@ searchInput.addEventListener('keydown', async (e) => {
   rows.forEach((row) => {
     const li = document.createElement('li');
     li.innerHTML = `<strong>${row.chapter_title || ''}</strong><br />${row.snippet}`;
-    li.addEventListener('click', () => window.loadChapter(row.chapter_idx, 0));
+    li.addEventListener('click', () => window.jumpToSearchHit(row.chapter_idx, q));
     searchResults.appendChild(li);
   });
 });

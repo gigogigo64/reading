@@ -57,9 +57,15 @@ $env:HTTP_PROXY="http://127.0.0.1:7890"; $env:HTTPS_PROXY="http://127.0.0.1:7890
 
 本地 Web 服务（Node.js + Express）+ 浏览器前端（原生 HTML/CSS/JS，无框架）。数据存储用 SQLite（better-sqlite3），全文检索用 FTS5 trigram 分词（应对中文子串检索），查询长度 < 3 字符时退化为 LIKE 扫描。
 
-正文分页采用 CSS 多栏排版（`column-count`）+ 原生 `scrollLeft` 横向滚动模拟翻页（而非 `transform: translateX`——后者对未曾滚动到过的多栏溢出内容存在绘制缺陷）；每次翻页跨越的像素间距需按“可视宽度 + 一个 column-gap”计算（否则每翻一页会少算一个栏间距，越往后偏差越大）。
+正文分页采用 CSS 多栏排版（`column-count`）+ 原生 `scrollLeft` 横向滚动模拟翻页（而非 `transform: translateX`——后者对未曾滚动到过的多栏溢出内容存在绘制缺陷）；每次翻页跨越的像素间距需按“可视宽度 + 一个 column-gap”计算（否则每翻一页会少算一个栏间距，越往后偏差越大）。跨章节翻页（上一页越过章节边界）会临时把 `scroll-behavior` 切成 `auto`，避免整段内容被“滑着”翻过去（视觉上会显得方向反了）。
 
-扫描版 PDF（无可提取文字层）不走文字解析，只在导入时用 `pdf-parse` 取页数/元信息，正文由前端 `pdfjs-dist`（挂载于 `/vendor/pdfjs`，来自 node_modules 直出，无需构建步骤）逐页渲染 canvas 图片，翻页 = 换一张图，不支持批注/全文检索。
+字号/字体/行距/栏数/页边距等阅读设置存在 `localStorage`（键 `readerSettings`），通过 CSS 自定义属性（`--reader-font-size` 等）下发到 `.page-container`/`.page-viewport`，改动后需要重新 `computePageCount()` + `goToPage()` 让分页跟着重排。
+
+批注高亮用不透明色块（`annotate.js` 的 `HIGHLIGHT_COLORS`），每次重新应用前先 `clearAnnotationMarks()` 拆掉旧 `<mark>` 再重新包裹——否则重复调用会把同一段文字嵌套包多层 `<mark>`，半透明背景层层叠加导致颜色越叠越深。点击正文里的高亮或批注面板里的删除按钮都能删除。
+
+全文检索点击结果后会 `loadChapter` + 在 DOM 里定位关键词、包一层 `mark.search-hit` 高亮，并根据命中位置换算翻到对应页。
+
+扫描版 PDF（无可提取文字层）不走文字解析，只在导入时用 `pdf-parse` 取页数/元信息，正文由前端 `pdfjs-dist`（挂载于 `/vendor/pdfjs`，来自 node_modules 直出，无需构建步骤）逐页渲染 canvas 图片（按 `devicePixelRatio` 渲染避免高分屏发虚），翻页 = 换一张图，鼠标滚轮在页面上直接缩放（`state.pdfZoom`），不支持批注/全文检索。
 
 ```
 server/
@@ -84,3 +90,4 @@ Windows 下也可直接双击根目录 `启动阅读工具.bat`：首次运行�
 - 封面（cover_path）目前未生成，书架卡片暂无封面图
 - multer 1.x 有已知安全公告，个人本地工具可接受，后续可评估升级 2.x
 - 扫描版 PDF 走整页图片翻页模式，无文字层，批注和全文检索对这类书不生效；如需支持可后续接入 OCR
+- 阅读设置（字号/字体/行距/栏数/页边距）存在浏览器 localStorage，是本机全局设置，不区分书籍、不跨设备同步
