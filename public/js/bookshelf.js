@@ -1,3 +1,13 @@
+const SPINE_COLORS = ['#3b4a6b', '#4a6741', '#a67c52', '#55534c', '#8c3a4b', '#2f3b52', '#6b5b3e'];
+
+function spineColorFor(title) {
+  let hash = 0;
+  for (let i = 0; i < title.length; i += 1) {
+    hash = (hash * 31 + title.charCodeAt(i)) >>> 0;
+  }
+  return SPINE_COLORS[hash % SPINE_COLORS.length];
+}
+
 async function fetchBooks() {
   const res = await fetch('/api/books');
   return res.json();
@@ -14,23 +24,34 @@ function renderShelf(books) {
   }
   emptyHint.hidden = true;
 
-  for (const book of books) {
-    const card = document.createElement('div');
-    card.className = 'book-card';
-    card.innerHTML = `
-      <button class="delete-btn" data-id="${book.id}">删除</button>
-      <h3>${book.title}</h3>
-      <p>${book.author || '未知作者'} · ${book.format.toUpperCase()}</p>
-      <p>共 ${book.chapter_count} 章 · 已读第 ${(book.chapter_idx || 0) + 1} 章</p>
+  books.forEach((book, i) => {
+    const readChapter = (book.chapter_idx || 0) + 1;
+    const progressPct = book.chapter_count
+      ? Math.min(100, Math.round((readChapter / book.chapter_count) * 100))
+      : 0;
+
+    const spine = document.createElement('div');
+    spine.className = 'book-spine';
+    spine.style.setProperty('--spine-color', spineColorFor(book.title));
+    spine.style.animationDelay = `${i * 0.05}s`;
+    spine.innerHTML = `
+      <button class="spine-delete" data-id="${book.id}" title="删除">×</button>
+      <span class="spine-title">${book.title}</span>
+      <div class="spine-progress"><i style="width:${progressPct}%"></i></div>
+      <div class="spine-tooltip">
+        <strong>${book.title}</strong>
+        ${book.author || '未知作者'} · ${book.format.toUpperCase()}<br />
+        共 ${book.chapter_count} 章 · 已读第 ${readChapter} 章（${progressPct}%）
+      </div>
     `;
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.delete-btn')) return;
+    spine.addEventListener('click', (e) => {
+      if (e.target.closest('.spine-delete')) return;
       window.location.href = `reader.html?id=${book.id}`;
     });
-    shelf.appendChild(card);
-  }
+    shelf.appendChild(spine);
+  });
 
-  shelf.querySelectorAll('.delete-btn').forEach((btn) => {
+  shelf.querySelectorAll('.spine-delete').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
       e.stopPropagation();
       if (!confirm('确认删除这本书吗？')) return;

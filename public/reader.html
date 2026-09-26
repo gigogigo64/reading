@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
-<title>阅读 - 本地阅读工具</title>
+<title>阅读 · 本地阅读</title>
 <link rel="stylesheet" href="css/style.css" />
 </head>
 <body class="reader-body">
@@ -29,18 +29,21 @@
     </div>
 
     <div id="selectionPopup" class="selection-popup" hidden>
-      <button id="highlightBtn">高亮/批注</button>
+      <button id="highlightBtn">高亮 / 批注</button>
     </div>
+
+    <nav class="tab-rail">
+      <button id="toggleToc" class="tab-btn">目录</button>
+      <button id="toggleNotes" class="tab-btn">批注</button>
+      <button id="toggleSearch" class="tab-btn">检索</button>
+      <button id="toggleTheme" class="tab-btn">日夜</button>
+    </nav>
 
     <footer class="toolbar">
       <a href="index.html" class="btn">← 书架</a>
-      <button id="toggleToc" class="btn">目录</button>
       <button id="prevPage" class="btn">上一页</button>
       <span id="pageIndicator" class="page-indicator"></span>
       <button id="nextPage" class="btn">下一页</button>
-      <button id="toggleNotes" class="btn">批注</button>
-      <button id="toggleSearch" class="btn">检索</button>
-      <button id="toggleTheme" class="btn">主题</button>
     </footer>
   </div>
 

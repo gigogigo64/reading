@@ -102,14 +102,22 @@ document.getElementById('nextPage').addEventListener('click', async () => {
   }
 });
 
+const PANEL_TABS = {
+  tocPanel: 'toggleToc',
+  notesPanel: 'toggleNotes',
+  searchPanel: 'toggleSearch'
+};
+
 function togglePanel(id) {
-  const panels = ['tocPanel', 'notesPanel', 'searchPanel'];
-  panels.forEach((p) => {
-    const el = document.getElementById(p);
-    if (p === id) {
-      el.hidden = !el.hidden;
+  Object.entries(PANEL_TABS).forEach(([panelId, tabId]) => {
+    const panel = document.getElementById(panelId);
+    const tab = document.getElementById(tabId);
+    if (panelId === id) {
+      panel.hidden = !panel.hidden;
+      tab.classList.toggle('active', !panel.hidden);
     } else {
-      el.hidden = true;
+      panel.hidden = true;
+      tab.classList.remove('active');
     }
   });
 }
@@ -123,6 +131,12 @@ document.getElementById('toggleSearch').addEventListener('click', () => togglePa
 
 document.getElementById('toggleTheme').addEventListener('click', () => {
   document.body.classList.toggle('theme-night');
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowLeft') document.getElementById('prevPage').click();
+  if (e.key === 'ArrowRight') document.getElementById('nextPage').click();
 });
 
 window.addEventListener('resize', () => {

@@ -5,3 +5,4 @@ server/storage/*.db
 server/storage/covers/*
 !server/storage/covers/.gitkeep
 *.log
+.claude/
