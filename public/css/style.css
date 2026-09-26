@@ -128,7 +128,7 @@ main { padding: 8px 48px 60px; }
 .book-spine {
   --spine-color: #55534c;
   position: relative;
-  width: 58px;
+  width: 96px;
   height: 220px;
   background: linear-gradient(120deg, var(--spine-color), color-mix(in srgb, var(--spine-color) 70%, black));
   border-radius: 2px 6px 2px 6px;
@@ -137,7 +137,7 @@ main { padding: 8px 48px 60px; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px 0;
+  padding: 18px 10px;
   opacity: 0;
   transform: translateY(18px);
   animation: rise 0.5s ease forwards;
@@ -167,15 +167,18 @@ main { padding: 8px 48px 60px; }
 }
 
 .spine-title {
-  writing-mode: vertical-rl;
   font-family: var(--font-display);
-  font-size: 17px;
-  letter-spacing: 0.12em;
+  font-size: 15px;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
   color: #f4e9d8;
+  text-align: center;
   max-height: 184px;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 7;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
   text-shadow: 0 1px 2px rgba(0,0,0,0.35);
 }
 
@@ -309,6 +312,13 @@ main { padding: 8px 48px 60px; }
   font-size: 13px;
 }
 
+.reading-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .page-viewport {
   flex: 1;
   padding: 56px 72px 24px;
@@ -336,17 +346,24 @@ main { padding: 8px 48px 60px; }
   background: linear-gradient(90deg, transparent, var(--seal), transparent);
 }
 
-.page-container {
+.page-scroller {
   flex: 1;
+  min-height: 0;
   overflow: hidden;
+  scroll-behavior: smooth;
+  position: relative;
+}
+
+.page-container {
+  height: 100%;
   column-count: 2;
   column-gap: 64px;
+  column-fill: auto;
   line-height: 2;
   font-family: var(--font-body);
   font-size: 18px;
   color: var(--ink);
   position: relative;
-  transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 .page-container::after {
@@ -360,7 +377,23 @@ main { padding: 8px 48px 60px; }
   opacity: 0.6;
 }
 
-.page-container p { margin: 0 0 1.1em; text-indent: 2em; }
+.pdf-viewer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.pdf-viewer canvas {
+  background: #fff;
+  box-shadow: 0 8px 24px var(--shadow-soft);
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.page-container p { margin: 0 0 1.1em; text-indent: 2em; break-inside: avoid; }
 
 .page-container mark.annotated {
   background: color-mix(in srgb, var(--seal-bright) 22%, transparent);

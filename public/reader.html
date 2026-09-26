@@ -23,9 +23,23 @@
       <ul id="searchResults"></ul>
     </aside>
 
-    <div class="page-viewport">
-      <h2 id="chapterTitle"></h2>
-      <div id="pageContainer" class="page-container"></div>
+    <div class="reading-area">
+      <div class="page-viewport">
+        <h2 id="chapterTitle"></h2>
+        <div id="pageScroller" class="page-scroller">
+          <div id="pageContainer" class="page-container"></div>
+        </div>
+        <div id="pdfViewer" class="pdf-viewer" hidden>
+          <canvas id="pdfCanvas"></canvas>
+        </div>
+      </div>
+
+      <footer class="toolbar">
+        <a href="index.html" class="btn">← 书架</a>
+        <button id="prevPage" class="btn">上一页</button>
+        <span id="pageIndicator" class="page-indicator"></span>
+        <button id="nextPage" class="btn">下一页</button>
+      </footer>
     </div>
 
     <div id="selectionPopup" class="selection-popup" hidden>
@@ -38,13 +52,6 @@
       <button id="toggleSearch" class="tab-btn">检索</button>
       <button id="toggleTheme" class="tab-btn">日夜</button>
     </nav>
-
-    <footer class="toolbar">
-      <a href="index.html" class="btn">← 书架</a>
-      <button id="prevPage" class="btn">上一页</button>
-      <span id="pageIndicator" class="page-indicator"></span>
-      <button id="nextPage" class="btn">下一页</button>
-    </footer>
   </div>
 
   <script src="js/reader.js"></script>

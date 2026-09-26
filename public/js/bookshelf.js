@@ -25,10 +25,12 @@ function renderShelf(books) {
   emptyHint.hidden = true;
 
   books.forEach((book, i) => {
-    const readChapter = (book.chapter_idx || 0) + 1;
+    const isPdf = book.format === 'pdf';
+    const readUnit = isPdf ? (book.position || 0) + 1 : (book.chapter_idx || 0) + 1;
     const progressPct = book.chapter_count
-      ? Math.min(100, Math.round((readChapter / book.chapter_count) * 100))
+      ? Math.min(100, Math.round((readUnit / book.chapter_count) * 100))
       : 0;
+    const unitLabel = isPdf ? '页' : '章';
 
     const spine = document.createElement('div');
     spine.className = 'book-spine';
@@ -41,7 +43,7 @@ function renderShelf(books) {
       <div class="spine-tooltip">
         <strong>${book.title}</strong>
         ${book.author || '未知作者'} · ${book.format.toUpperCase()}<br />
-        共 ${book.chapter_count} 章 · 已读第 ${readChapter} 章（${progressPct}%）
+        共 ${book.chapter_count} ${unitLabel} · 已读第 ${readUnit} ${unitLabel}（${progressPct}%）
       </div>
     `;
     spine.addEventListener('click', (e) => {

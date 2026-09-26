@@ -13,6 +13,10 @@ const upload = multer({ dest: BOOKS_DIR });
 router.post('/', upload.single('file'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: '未收到文件' });
 
+  // busboy（multer 底层）按 HTTP 头规范默认用 latin1 解码 multipart 字段，
+  // 非 ASCII 文件名（中文书名很常见）需要手动重新按 UTF-8 解码，否则标题会乱码。
+  req.file.originalname = Buffer.from(req.file.originalname, 'latin1').toString('utf8');
+
   const ext = path.extname(req.file.originalname).toLowerCase();
   const storedName = `${req.file.filename}${ext}`;
   const storedPath = path.join(BOOKS_DIR, storedName);
@@ -22,13 +26,14 @@ router.post('/', upload.single('file'), async (req, res) => {
     const parsed = await parseBook(storedPath, req.file.originalname);
 
     const insertBook = db.prepare(
-      `INSERT INTO books (title, author, format, file_path) VALUES (?, ?, ?, ?)`
+      `INSERT INTO books (title, author, format, file_path, page_count) VALUES (?, ?, ?, ?, ?)`
     );
     const info = insertBook.run(
       parsed.title,
       parsed.author,
       parsed.format,
-      path.relative(path.join(__dirname, '..'), storedPath)
+      path.relative(path.join(__dirname, '..'), storedPath),
+      parsed.pageCount || null
     );
     const bookId = info.lastInsertRowid;
 
@@ -54,14 +59,29 @@ router.post('/', upload.single('file'), async (req, res) => {
 router.get('/', (req, res) => {
   const books = db
     .prepare(
-      `SELECT b.id, b.title, b.author, b.format, b.cover_path, b.imported_at,
-              (SELECT COUNT(*) FROM chapters c WHERE c.book_id = b.id) AS chapter_count,
+      `SELECT b.id, b.title, b.author, b.format, b.cover_path, b.imported_at, b.page_count,
+              COALESCE(NULLIF((SELECT COUNT(*) FROM chapters c WHERE c.book_id = b.id), 0), b.page_count, 0) AS chapter_count,
               p.chapter_idx, p.position
        FROM books b LEFT JOIN progress p ON p.book_id = b.id
        ORDER BY b.imported_at DESC`
     )
     .all();
   res.json(books);
+});
+
+router.get('/:id', (req, res) => {
+  const book = db
+    .prepare(`SELECT id, title, author, format, page_count FROM books WHERE id = ?`)
+    .get(req.params.id);
+  if (!book) return res.status(404).json({ error: '书籍不存在' });
+  res.json(book);
+});
+
+router.get('/:id/file', (req, res) => {
+  const book = db.prepare(`SELECT file_path FROM books WHERE id = ?`).get(req.params.id);
+  if (!book) return res.status(404).json({ error: '书籍不存在' });
+  const absPath = path.join(__dirname, '..', book.file_path);
+  res.sendFile(absPath);
 });
 
 router.get('/:id/toc', (req, res) => {

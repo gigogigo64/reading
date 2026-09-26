@@ -66,4 +66,9 @@ CREATE TABLE IF NOT EXISTS annotations (
 );
 `);
 
+const bookCols = db.prepare(`PRAGMA table_info(books)`).all().map((c) => c.name);
+if (!bookCols.includes('page_count')) {
+  db.exec(`ALTER TABLE books ADD COLUMN page_count INTEGER`);
+}
+
 module.exports = db;

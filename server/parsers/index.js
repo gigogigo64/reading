@@ -1,6 +1,7 @@
 const path = require('path');
 const { parseTxt } = require('./txt');
 const { parseEpub } = require('./epub');
+const { parsePdf } = require('./pdf');
 
 async function parseBook(filePath, originalName) {
   const ext = path.extname(originalName).toLowerCase();
@@ -11,6 +12,9 @@ async function parseBook(filePath, originalName) {
   }
   if (ext === '.epub') {
     return { format: 'epub', ...(await parseEpub(filePath, titleGuess)) };
+  }
+  if (ext === '.pdf') {
+    return { format: 'pdf', ...(await parsePdf(filePath, titleGuess)) };
   }
   throw new Error(`不支持的文件格式: ${ext}`);
 }
