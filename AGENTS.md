@@ -40,6 +40,19 @@
 
 https://github.com/gigogigo64/reading
 
+## 网络代理
+
+访问 GitHub 等境外服务时，本机需通过本地代理端口 **7890** 才能连通。不修改 `git config`（全局/仓库级代理配置一律不动），改为在执行 `git push` / `git fetch` / `git pull` 等命令时临时设置环境变量：
+
+```bash
+HTTP_PROXY=http://127.0.0.1:7890 HTTPS_PROXY=http://127.0.0.1:7890 git push origin main
+```
+
+PowerShell 下等效写法：
+```powershell
+$env:HTTP_PROXY="http://127.0.0.1:7890"; $env:HTTPS_PROXY="http://127.0.0.1:7890"; git push origin main
+```
+
 ## 技术架构
 
 本地 Web 服务（Node.js + Express）+ 浏览器前端（原生 HTML/CSS/JS，无框架）。数据存储用 SQLite（better-sqlite3），全文检索用 FTS5 trigram 分词（应对中文子串检索），查询长度 < 3 字符时退化为 LIKE 扫描。
