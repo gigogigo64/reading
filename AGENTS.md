@@ -72,6 +72,8 @@ public/
 
 启动：`npm install && npm start`，浏览器打开 http://localhost:3000
 
+Windows 下也可直接双击根目录 `启动阅读工具.bat`：首次运行自动 `npm install`，随后自动启动服务并打开浏览器。关闭它打开的控制台窗口即可停止服务。
+
 ## 待完善事项
 
 - 批注跨 DOM 文本节点的选区高亮（annotate.js 的 wrapRange）在选区跨越多个段落时会静默跳过，尚未做鲁棒处理
