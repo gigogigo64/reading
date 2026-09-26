@@ -112,10 +112,17 @@ async function renderPdfPage(pageNum) {
   const availHeight = pdfViewerEl.clientHeight - 32;
   const scale = Math.max(0.1, Math.min(availWidth / unscaled.width, availHeight / unscaled.height));
   const viewport = page.getViewport({ scale });
-  pdfCanvas.width = viewport.width;
-  pdfCanvas.height = viewport.height;
+
+  // 按设备像素比渲染，否则高分屏下 canvas 位图分辨率低于实际显示尺寸，画面会发虚。
+  const outputScale = window.devicePixelRatio || 1;
+  pdfCanvas.width = Math.floor(viewport.width * outputScale);
+  pdfCanvas.height = Math.floor(viewport.height * outputScale);
+  pdfCanvas.style.width = `${Math.floor(viewport.width)}px`;
+  pdfCanvas.style.height = `${Math.floor(viewport.height)}px`;
+
   const ctx = pdfCanvas.getContext('2d');
-  await page.render({ canvasContext: ctx, viewport }).promise;
+  const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined;
+  await page.render({ canvasContext: ctx, viewport, transform }).promise;
 }
 
 async function initPdfMode(progress) {

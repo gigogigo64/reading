@@ -386,6 +386,8 @@ main { padding: 8px 48px 60px; }
   overflow: auto;
 }
 
+.pdf-viewer[hidden] { display: none; }
+
 .pdf-viewer canvas {
   background: #fff;
   box-shadow: 0 8px 24px var(--shadow-soft);
