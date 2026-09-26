@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>阅读 - 本地阅读工具</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="reader-body">
+  <div class="reader-shell">
+    <aside id="tocPanel" class="side-panel" hidden>
+      <h3>目录</h3>
+      <ul id="tocList"></ul>
+    </aside>
+
+    <aside id="notesPanel" class="side-panel" hidden>
+      <h3>批注</h3>
+      <ul id="notesList"></ul>
+    </aside>
+
+    <aside id="searchPanel" class="side-panel" hidden>
+      <h3>检索</h3>
+      <input id="searchInput" placeholder="输入关键词，回车检索" />
+      <ul id="searchResults"></ul>
+    </aside>
+
+    <div class="page-viewport">
+      <h2 id="chapterTitle"></h2>
+      <div id="pageContainer" class="page-container"></div>
+    </div>
+
+    <div id="selectionPopup" class="selection-popup" hidden>
+      <button id="highlightBtn">高亮/批注</button>
+    </div>
+
+    <footer class="toolbar">
+      <a href="index.html" class="btn">← 书架</a>
+      <button id="toggleToc" class="btn">目录</button>
+      <button id="prevPage" class="btn">上一页</button>
+      <span id="pageIndicator" class="page-indicator"></span>
+      <button id="nextPage" class="btn">下一页</button>
+      <button id="toggleNotes" class="btn">批注</button>
+      <button id="toggleSearch" class="btn">检索</button>
+      <button id="toggleTheme" class="btn">主题</button>
+    </footer>
+  </div>
+
+  <script src="js/reader.js"></script>
+  <script src="js/annotate.js"></script>
+  <script src="js/search.js"></script>
+</body>
+</html>

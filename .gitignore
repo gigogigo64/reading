@@ -1,0 +1,7 @@
+node_modules/
+server/storage/books/*
+!server/storage/books/.gitkeep
+server/storage/*.db
+server/storage/covers/*
+!server/storage/covers/.gitkeep
+*.log

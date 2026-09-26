@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>书架 - 本地阅读工具</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>我的书架</h1>
+    <label class="import-btn">
+      导入书籍
+      <input type="file" id="fileInput" accept=".txt,.epub" hidden />
+    </label>
+  </header>
+
+  <main>
+    <div id="shelf" class="shelf"></div>
+    <p id="emptyHint" class="hint" hidden>书架空空如也，点击右上角"导入书籍"开始。</p>
+  </main>
+
+  <script src="js/bookshelf.js"></script>
+</body>
+</html>
