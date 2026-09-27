@@ -224,13 +224,9 @@ document.getElementById('prevPage').addEventListener('click', async () => {
   if (state.pageIndex > 0) {
     goToPage(state.pageIndex - 1);
   } else if (state.mode !== 'pdf' && state.chapterIdx > 0) {
-    // 跨章节直接落到目标页，不要顺着 scrollLeft 的方向"滑"过去——
-    // 那样视觉上会像在往前翻，而不是往回翻。
-    pageScroller.style.scrollBehavior = 'auto';
     await loadChapter(state.chapterIdx - 1, 9999);
     computePageCount();
     goToPage(state.pageCount - 1);
-    pageScroller.style.scrollBehavior = '';
   }
 });
 
@@ -238,9 +234,7 @@ document.getElementById('nextPage').addEventListener('click', async () => {
   if (state.pageIndex < state.pageCount - 1) {
     goToPage(state.pageIndex + 1);
   } else if (state.mode !== 'pdf' && state.chapterIdx < state.toc.length - 1) {
-    pageScroller.style.scrollBehavior = 'auto';
     await loadChapter(state.chapterIdx + 1, 0);
-    pageScroller.style.scrollBehavior = '';
   }
 });
 
@@ -281,15 +275,44 @@ pdfViewerEl.addEventListener('wheel', (e) => {
   if (state.mode !== 'pdf') return;
   e.preventDefault();
   const factor = Math.exp(-e.deltaY * 0.0015);
-  state.pdfZoom = Math.min(4, Math.max(0.5, state.pdfZoom * factor));
+  const nextZoom = Math.min(4, Math.max(0.5, state.pdfZoom * factor));
+  if (nextZoom === state.pdfZoom) return;
+
+  // 记录鼠标当前对准的是画布上的哪一点（比例坐标），缩放完成后让这一点
+  // 仍然停在鼠标下方，而不是整页跳来跳去。
+  const rect = pdfViewerEl.getBoundingClientRect();
+  const anchorX = (pdfViewerEl.scrollLeft + (e.clientX - rect.left)) / pdfCanvas.offsetWidth;
+  const anchorY = (pdfViewerEl.scrollTop + (e.clientY - rect.top)) / pdfCanvas.offsetHeight;
+
+  state.pdfZoom = nextZoom;
   if (!pdfWheelPending) {
     pdfWheelPending = true;
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
       pdfWheelPending = false;
-      renderPdfPage(state.pageIndex + 1);
+      await renderPdfPage(state.pageIndex + 1);
+      pdfViewerEl.scrollLeft = anchorX * pdfCanvas.offsetWidth - (e.clientX - rect.left);
+      pdfViewerEl.scrollTop = anchorY * pdfCanvas.offsetHeight - (e.clientY - rect.top);
     });
   }
 }, { passive: false });
+
+let panState = null;
+pdfViewerEl.addEventListener('mousedown', (e) => {
+  if (state.mode !== 'pdf') return;
+  panState = { x: e.clientX, y: e.clientY, scrollLeft: pdfViewerEl.scrollLeft, scrollTop: pdfViewerEl.scrollTop };
+  pdfViewerEl.classList.add('panning');
+  e.preventDefault();
+});
+window.addEventListener('mousemove', (e) => {
+  if (!panState) return;
+  pdfViewerEl.scrollLeft = panState.scrollLeft - (e.clientX - panState.x);
+  pdfViewerEl.scrollTop = panState.scrollTop - (e.clientY - panState.y);
+});
+window.addEventListener('mouseup', () => {
+  if (!panState) return;
+  panState = null;
+  pdfViewerEl.classList.remove('panning');
+});
 
 async function initPdfMode(progress) {
   state.mode = 'pdf';

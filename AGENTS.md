@@ -57,7 +57,9 @@ $env:HTTP_PROXY="http://127.0.0.1:7890"; $env:HTTPS_PROXY="http://127.0.0.1:7890
 
 本地 Web 服务（Node.js + Express）+ 浏览器前端（原生 HTML/CSS/JS，无框架）。数据存储用 SQLite（better-sqlite3），全文检索用 FTS5 trigram 分词（应对中文子串检索），查询长度 < 3 字符时退化为 LIKE 扫描。
 
-正文分页采用 CSS 多栏排版（`column-count`）+ 原生 `scrollLeft` 横向滚动模拟翻页（而非 `transform: translateX`——后者对未曾滚动到过的多栏溢出内容存在绘制缺陷）；每次翻页跨越的像素间距需按“可视宽度 + 一个 column-gap”计算（否则每翻一页会少算一个栏间距，越往后偏差越大）。跨章节翻页（上一页越过章节边界）会临时把 `scroll-behavior` 切成 `auto`，避免整段内容被“滑着”翻过去（视觉上会显得方向反了）。
+正文分页采用 CSS 多栏排版（`column-count`）+ 原生 `scrollLeft` 横向滚动模拟翻页（而非 `transform: translateX`——后者对未曾滚动到过的多栏溢出内容存在绘制缺陷）；每次翻页跨越的像素间距需按”可视宽度 + 一个 column-gap”计算（否则每翻一页会少算一个栏间距，越往后偏差越大）。翻页不做过渡动画（`scrollLeft` 直接跳转），跨章节翻页也是直接落到目标页，没有方向感的问题。
+
+PDF 阅读页缩放：滚轮缩放围绕鼠标当前指向的那一点等比例放大/缩小（0.5x~4x），不做”适应屏幕短边”的强制收缩；画布一旦超出可视区域，容器出现滚动条，可用鼠标拖拽（`mousedown`+`mousemove`）平移查看。
 
 字号/字体/行距/栏数/页边距等阅读设置存在 `localStorage`（键 `readerSettings`），通过 CSS 自定义属性（`--reader-font-size` 等）下发到 `.page-container`/`.page-viewport`，改动后需要重新 `computePageCount()` + `goToPage()` 让分页跟着重排。
 
